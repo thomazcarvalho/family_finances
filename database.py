@@ -1,11 +1,18 @@
 import sqlite3
 
 
-def create_database():
-    pass
-
-
 def register_new_user(user, password):
+    """Registra um novo usuário no banco de dados do admin caso não exista.
+
+    Args:
+        user: Usuário que deseja cadastrar;
+        password: Senha que deseja cadastrar.
+
+    Returns:
+        Integer: 0 -> usuário já existente
+                 1 -> cadastrado com sucesso
+                 descrição do erro -> existência de erro
+    """
     try:
         conn = sqlite3.connect('admin_database.db')
         cur = conn.cursor()
@@ -17,7 +24,9 @@ def register_new_user(user, password):
                             WHERE user = "{user}"')
         check = check.fetchall()
         if len(check) != 0:
-            return False
+            cur.close()
+            conn.close()
+            return 0
         cur.execute(f'INSERT INTO users_and_passwords (user, password) \
                     VALUES ("{user}", "{password}")')
         conn.commit()
@@ -28,13 +37,24 @@ def register_new_user(user, password):
                                f'{user}_database.db')
         conn.commit()
         conn.close()
-    except Exception:
-        return False
+    except Exception as error:
+        return error
     else:
-        return True
+        return 1
 
 
 def check_user(login, password):
+    """A função confere se o usuário e senha estejam cadastrados e batendo no
+        banco de dados SQLite.
+
+    Args:
+        login ([type]): login que está cadastrado;
+        password ([type]): senha cadastrada.
+
+    Returns:
+        Boolean: Retorna True para caso o usuário e senha confiram
+                ou False caso não confiram ou em casos de exceção.
+    """
     conn = sqlite3.connect('admin_database.db')
     cur = conn.cursor()
     try:
@@ -70,8 +90,3 @@ def table_exists(db_name, table_name):
             return False
         else:
             return True
-
-
-print(table_exists('admin_database.db', 'users_and_passwords'))
-print(register_new_user('thomaz', 123456))
-print(table_exists('admin_database.db', 'users_and_passwords'))

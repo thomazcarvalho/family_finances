@@ -9,19 +9,25 @@ def register_new_user(user, password):
     try:
         conn = sqlite3.connect('admin_database.db')
         cur = conn.cursor()
-        breakpoint
-        cur.execute('CREATE TABLE users_and_passwords IF NOT EXISTS ('
-                    'id PRIMARY KEY AUTOINCREMENT NOT NULL,'
-                    'user VARCHAR(20),'
-                    'password VARCHAR(20)'
-                    ')')
-        cur.execute('INSERT INTO users_and_passwords (user, password) '
-                    f'VALUES ({user}, {password}) ')
+        cur.execute('CREATE TABLE IF NOT EXISTS users_and_passwords \
+                    (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, \
+                    user VARCHAR(20), \
+                    password VARCHAR(20))')
+        check = cur.execute(f'SELECT user FROM users_and_passwords\
+                            WHERE user = "{user}"')
+        check = check.fetchall()
+        if len(check) != 0:
+            return False
+        cur.execute(f'INSERT INTO users_and_passwords (user, password) \
+                    VALUES ("{user}", "{password}")')
         conn.commit()
+        cur.close()
+        conn.close()
         conn = sqlite3.connect('C:/Users/thoma/Documents/GitHub/'
                                'family_finances/databases usuários/'
-                               f'{user}_database')
+                               f'{user}_database.db')
         conn.commit()
+        conn.close()
     except Exception:
         return False
     else:
@@ -31,24 +37,41 @@ def register_new_user(user, password):
 def check_user(login, password):
     conn = sqlite3.connect('admin_database.db')
     cur = conn.cursor()
-    check = cur.execute('SELECT user, password FROM users_and_passwords'
-                        f'WHERE user = {login} and password = {password}')
-    if check == 1:
-        return True
-    else:
+    try:
+        check = cur.execute(f'SELECT user, password FROM users_and_passwords\
+                            WHERE user = "{login}" and \
+                            password = "{password}"')
+        check = check.fetchall()
+    except Exception:
         return False
+    else:
+        if len(check) == 0:
+            return False
+        else:
+            return True
+    finally:
+        cur.close()
+        conn.close()
 
 
 def table_exists(db_name, table_name):
     try:
         conn = sqlite3.connect(db_name)
         cur = conn.cursor()
+        check = cur.execute(f'SELECT name FROM sqlite_sequence \
+                            WHERE name="{table_name}"')
+        check = check.fetchall()
+        cur.close()
+        conn.close()
     except Exception:
         return False
     else:
-        test = cur.execute('SELECT name FROM sqlite_master '
-                           f'WHERE type="table" AND name=\'{table_name}\'')
-        if test == 0:
+        if len(check) == 0:
             return False
-        elif test == 1:
+        else:
             return True
+
+
+print(table_exists('admin_database.db', 'users_and_passwords'))
+print(register_new_user('thomaz', 123456))
+print(table_exists('admin_database.db', 'users_and_passwords'))

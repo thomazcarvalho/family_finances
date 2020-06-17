@@ -60,7 +60,7 @@ class User:
         print('Login efetuado. Pronto para acessar.\n')
         print('O que deseja fazer?')
         print(
-            '1 - Fazer check do pagamnto de uma conta;\n'
+            '1 - Fazer check do pagamento de uma conta;\n'
             '2 - Adicionar conta;\n'
             '3 - Remover conta;\n'
             '4 - Verificar contas atuais;\n'

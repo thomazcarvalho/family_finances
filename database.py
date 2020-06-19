@@ -90,3 +90,22 @@ def table_exists(db_name, table_name):
             return False
         else:
             return True
+
+
+def check_login(login):
+    conn = sqlite3.connect('admin_database.db')
+    cur = conn.cursor()
+    try:
+        check = cur.execute(f'SELECT user, password FROM users_and_passwords\
+                            WHERE user = "{login}"')
+        check = check.fetchall()
+    except Exception:
+        return False
+    else:
+        if len(check) == 0:
+            return False
+        else:
+            return True
+    finally:
+        cur.close()
+        conn.close()
